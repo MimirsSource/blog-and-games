@@ -1,8 +1,17 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 
 import { Container, Row, Col, Label, Input, Button } from "reactstrap";
+import { MolaGame } from "./Mola/mola.game";
+import MolaState from "./Mola/mola.state";
 
-export class Mola extends Component {
+interface IProps {
+}
+
+interface IState {
+    gameState: MolaState;
+}
+
+export class Mola extends React.Component<IProps, IState> {
 
     headlineStyle = {
         backgroundColor: '#040b63',
@@ -10,6 +19,18 @@ export class Mola extends Component {
         paddingTop: '0.5rem',
         marginBottom: '1rem'
     };
+
+    game: MolaGame = new MolaGame();
+
+    constructor(props: any) {
+        super(props);
+        this.state = { gameState: new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0]) }
+    }
+
+    handleUpdate(gameState: MolaState) {
+        this.setState({ gameState: gameState }, 
+            () => { console.log("Component state: " + this.state.gameState.positions) });
+    }
 
     render() {
         return (
@@ -28,52 +49,55 @@ export class Mola extends Component {
                             <Input type="checkbox" /> Spieler 2 Computer
                         </Row>
                         <Row>
-                            <Button color="primary"> Neues Spiel</Button>
+                            <Button color="primary"
+                                onClick={() => this.game.runGame((gameState: MolaState) => this.handleUpdate(gameState))}>
+                                    Neues Spiel
+                            </Button>
                         </Row>
                         <Row>
                             <Button color="secondary"> Trainiere KI</Button>
                         </Row>
                     </Col>
-                    <Board></Board>
+                    <Board gameState={this.state.gameState}></Board>
                 </Row>
             </Container>)
     }
 }
 
-const Board = () => {
+const Board = (props: any) => {
     return (
         <Col sm="12" md="8">
             <Row>
-                <Col sm={{size:3, offset: 1}}>
-                    <Field></Field>
+                <Col sm={{ size: 3, offset: 1 }}>
+                    <Field player={props.gameState.positions[0]}></Field>
                 </Col>
                 <Col sm="3">
-                    <Field></Field>
+                    <Field player={props.gameState.positions[1]}></Field>
                 </Col>
                 <Col sm="3">
-                    <Field></Field>
+                    <Field player={props.gameState.positions[2]}></Field>
                 </Col>
             </Row>
             <Row>
-                <Col sm={{size:3, offset: 1}}>
-                    <Field></Field>
+                <Col sm={{ size: 3, offset: 1 }}>
+                    <Field player={props.gameState.positions[3]}></Field>
                 </Col>
                 <Col sm="3">
-                    <Field player={1}></Field>
+                    <Field player={props.gameState.positions[4]}></Field>
                 </Col>
                 <Col sm="3">
-                    <Field></Field>
+                    <Field player={props.gameState.positions[5]}></Field>
                 </Col>
             </Row>
             <Row>
-                <Col sm={{size:3, offset: 1}}>
-                    <Field player={2}></Field>
+                <Col sm={{ size: 3, offset: 1 }}>
+                    <Field player={props.gameState.positions[6]}></Field>
                 </Col>
                 <Col sm="3">
-                    <Field></Field>
+                    <Field player={props.gameState.positions[7]}></Field>
                 </Col>
                 <Col sm="3">
-                    <Field></Field>
+                    <Field player={props.gameState.positions[8]}></Field>
                 </Col>
             </Row>
         </Col>);
@@ -105,16 +129,16 @@ const Field = (props: any) => {
         margin: '0.2em'
     };
 
-    let getLayout = function(player: number) {
-        console.log('Player '+ player)
-        if(player === 1) {
+    let getLayout = function (player: number) {
+        console.log('Player ' + player)
+        if (player === 1) {
             return styleOne;
         }
-        if(player === 2) {
+        if (player === -1) {
             return styleTwo;
         }
         return styleEmpty;
     }
 
-    return (<div style={getLayout(props.player)}>{props.player}</div>);
+    return (<div style={getLayout(props.player)}></div>);
 }
