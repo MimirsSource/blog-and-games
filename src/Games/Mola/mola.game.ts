@@ -4,8 +4,8 @@ import { Rule, SetRule, MoveRule, JumpRule } from "./mola.rules";
 
 export class MolaGame {
 
-    playerOne: MolaPlayer = new MolaPlayer(1);
-    playerTwo: MolaPlayer = new MolaPlayer(-1);
+    playerOne: MolaPlayer = new AIPlayer(1);
+    playerTwo: MolaPlayer = new AIPlayer(-1);
 
     state: MolaState = new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
     rules: Rule[] = [new SetRule(), new MoveRule(), new JumpRule()];
@@ -41,8 +41,6 @@ export class MolaGame {
     }
 
     doMove(state: MolaState, player: MolaPlayer): boolean {
-        // if(!this.getAllowedMoves(state, player).includes)
-        // TODO check if status is allowed
         this.state = new MolaState(state.positions);
         return true;
     }
@@ -65,7 +63,7 @@ export class MolaGame {
 }
 
 
-export class MolaPlayer implements Player {
+export abstract class MolaPlayer implements Player {
 
     constructor(private playerSymbol: number) {
 
@@ -79,16 +77,38 @@ export class MolaPlayer implements Player {
         return states[0]; // TODO knowledge base & training
     }
 
+    abstract endGame(winner: boolean): void;
+
 }
 
 class AIPlayer extends MolaPlayer {
 
     minValue = -1000;
     maxValue = 1000;
+    trainingMode: boolean = true;
 
     knowledgeBase: Map<number, number> = new Map();
+    choiceHistory: Array<number> = new Array();
 
     chooseMove(states: MolaState[]): MolaState {
+        if(this.trainingMode) {
+            return this.trainingChoice(states);
+        }
+        return this.makeChoice(states);
+    }
+
+    trainingChoice(states: MolaState[]): MolaState {
+        let choice: MolaState;
+        if(Math.random() <= 0.2) {
+            choice = states[Math.floor((Math.random() * states.length))];
+        } else {
+            choice = this.makeChoice(states);
+        }
+        this.choiceHistory.push(choice.id);
+        return choice;
+    }
+
+    makeChoice(states: MolaState[]): MolaState {
         let stateValue : number = this.minValue;
         let choice: MolaState = states[0];
         for(let i=0; i<states.length; i++) {
@@ -101,4 +121,21 @@ class AIPlayer extends MolaPlayer {
         return choice;
     }
 
+    endGame(winner: boolean): void {
+        this.propagateFeedback(winner ? this.maxValue : this.minValue);
+    }
+
+    propagateFeedback(reward: number) {
+        let currentReward: number = reward;
+        for(let i=this.choiceHistory.length; i >= 0; i--) {
+            if(this.knowledgeBase.has(this.choiceHistory[i])) {
+                this.knowledgeBase.set(this.choiceHistory[i], 
+                (this.knowledgeBase.get(this.choiceHistory[i]) || 0)/2 + currentReward/2)
+            } else {
+                this.knowledgeBase.set(this.choiceHistory[i], currentReward);
+            }
+            currentReward = currentReward/2;
+        }
+    }
+ 
 }
