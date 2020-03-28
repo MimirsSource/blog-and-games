@@ -1,5 +1,5 @@
-import { MolaPlayer } from "./mola.game";
 import MolaState from "./mola.state";
+import { MolaPlayer } from "./mola.player";
 
 export interface Rule {
 
@@ -8,7 +8,7 @@ export interface Rule {
     resultingStates(state: MolaState, player: MolaPlayer): MolaState[];
 }
 
-export class SetRule implements Rule {
+class SetRule implements Rule {
 
     isApplicable(state: MolaState, player: MolaPlayer): boolean {
         return !allStonesSet(state, player);
@@ -16,7 +16,6 @@ export class SetRule implements Rule {
 
     resultingStates(state: MolaState, player: MolaPlayer): MolaState[] {
         let result: MolaState[] = new Array();
-        console.log("Sets");
         if (this.isApplicable(state, player)) {
             console.log(state.positions);
             for (var i = 0; i < 9; i++) {
@@ -31,7 +30,7 @@ export class SetRule implements Rule {
 
 }
 
-export class MoveRule implements Rule {
+class MoveRule implements Rule {
     isApplicable(state: MolaState, player: MolaPlayer): boolean {
         return allStonesSet(state, player);
     }
@@ -61,7 +60,7 @@ export class MoveRule implements Rule {
 
 }
 
-export class JumpRule implements Rule {
+class JumpRule implements Rule {
     isApplicable(state: MolaState, player: MolaPlayer): boolean {
         return allStonesSet(state, player);
     }
@@ -100,7 +99,7 @@ export class JumpRule implements Rule {
 
 }
 
-const allStonesSet = (state: MolaState, player: MolaPlayer): boolean => {
+export const allStonesSet = (state: MolaState, player: MolaPlayer): boolean => {
     let count = 0;
     for (var i = 0; i < 9; i++) {
         if (state.positions[i] == player.getPlayerSymbol()) {
@@ -124,4 +123,30 @@ const moveStone = (state: MolaState, fromPosition: number, toPosition: number) =
     newPositions[toPosition] = newPositions[fromPosition];
     newPositions[fromPosition] = 0;
     return new MolaState(newPositions);
+}
+
+export const rules: Rule[] = [new SetRule(), new MoveRule(), new JumpRule()];
+
+export const getAllowedMoves = (state: MolaState, player: MolaPlayer): MolaState[] => {
+    let result: MolaState[] = new Array();
+    for (let i: number = 0; i < rules.length; i++) {
+        result = result.concat(rules[i].resultingStates(state, player));
+        console.log(result);
+    }
+    return result;
+}
+
+export const isWinningState = (state: MolaState, player: MolaPlayer): boolean => {
+    let symbol: number = player.getPlayerSymbol();
+    // horizontal
+    return state.positions[0] === symbol && state.positions[1] === symbol && state.positions[2] === symbol ||
+        state.positions[3] === symbol && state.positions[4] === symbol && state.positions[5] === symbol ||
+        state.positions[6] === symbol && state.positions[7] === symbol && state.positions[8] === symbol ||
+        // vertical
+        state.positions[0] === symbol && state.positions[3] === symbol && state.positions[6] === symbol ||
+        state.positions[1] === symbol && state.positions[4] === symbol && state.positions[7] === symbol ||
+        state.positions[2] === symbol && state.positions[5] === symbol && state.positions[8] === symbol ||
+        // diagonal
+        state.positions[0] === symbol && state.positions[4] === symbol && state.positions[8] === symbol ||
+        state.positions[2] === symbol && state.positions[4] === symbol && state.positions[6] === symbol;
 }

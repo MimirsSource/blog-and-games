@@ -1,10 +1,6 @@
 export default class MolaState {
 
-    id: number;
-
-    constructor(public positions: number[]) {
-        this.id = this.calculateId();
-    }
+    constructor(public positions: number[]) {}
 
     calculateId(): number {
         let tempId: number = 0;
