@@ -55,7 +55,9 @@ export class Mola extends React.Component<IProps, IState> {
                             </Button>
                         </Row>
                         <Row>
-                            <Button color="secondary"> Trainiere KI</Button>
+                            <Button color="secondary"
+                            onClick={() => this.game.trainAI((gameState: MolaState) => this.handleUpdate(gameState), 1000)}> 
+                                Trainiere KI</Button>
                         </Row>
                     </Col>
                     <Board gameState={this.state.gameState}></Board>
@@ -134,7 +136,7 @@ const Field = (props: any) => {
         if (player === 1) {
             return styleOne;
         }
-        if (player === -1) {
+        if (player === 2) {
             return styleTwo;
         }
         return styleEmpty;
