@@ -1,15 +1,14 @@
 import React from 'react';
 import './App.css';
-import { Navigation } from './Navigation/Navigation';
 import { Mola } from './Games/Mola';
-import { Footer } from './Footer/Footer';
+import { Navigation } from './Navigation/Navigation';
 
 function App() {
   return (
     <div>
       <Navigation></Navigation>
       <Mola></Mola>
-      <Footer></Footer>
+      {/* <Footer></Footer> */}
     </div>
   );
 }

@@ -32,6 +32,13 @@ export class MolaGame {
         this.intervalId = setInterval(() => this.gameIteration(uiStateHandler), this.training ? 10 : 2000);
     }
 
+    stopGame(uiStateHandler: (gameState: MolaState) => void) {
+        this.reset();
+        this.gameState.running = false;
+        uiStateHandler(this.gameState.currentState);
+        clearInterval(this.intervalId);
+    }
+
     gameIteration(uiStateHandler: (gameState: MolaState) => void) {
         if(this.gameState.running === true) {
             console.log("Do move!");

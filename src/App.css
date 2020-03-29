@@ -1,4 +1,25 @@
 body {
-  background-color: #282c34;
+  background-color: #1D1A31;
   color: #ffffff;
 }
+
+.navigation {
+  background-color: #444B6E;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+
+.information {
+  background-color: #3D315B;
+}
+
+.gamefield {
+  width: 12vw;
+  height: 12vw;
+  border: 0.5rem outset;
+  margin: 0.2rem;
+  cursor: pointer;
+};
+
