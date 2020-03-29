@@ -22,6 +22,18 @@ export class Mola extends React.Component<IProps, IState> {
         marginBottom: '1rem'
     };
 
+    controlStyle = {
+        backgroundColor: '#040b63',
+        border: '0.5rem outset #040b63',
+        paddingTop: '0.5rem',
+        marginBottom: '1rem',
+        overflow: 'hidden'
+    };
+
+    controlElementStyle = {
+        padding: '0.5rem 0 0.5rem 0',
+    };
+
     game: MolaGame = new MolaGame();
     userPickedField: number = -1;
 
@@ -77,23 +89,47 @@ export class Mola extends React.Component<IProps, IState> {
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm="12" md="2">
+                    <Col sm="12" md="2" style={this.controlStyle}>
                         <Row>
-                            <Input type="checkbox" onChange={(event) => this.handleChangeOne(event)} /> Spieler 1 Computer
+                            <Col sm="12" style={{padding: '0 0 0 1rem', margin: '0 0 0 1rem'}}>
+                                <Input type="checkbox" onChange={(event) => this.handleChangeOne(event)} /> Spieler 1 Computer
+                            </Col>
                         </Row>
                         <Row>
-                            <Input type="checkbox" onChange={(event) => this.handleChangeTwo(event)} /> Spieler 2 Computer
+                            <Col sm="12" style={{padding: '0 0 0 1rem', margin: '0 0 0 1rem'}}>
+                                <Input type="checkbox" onChange={(event) => this.handleChangeTwo(event)} /> Spieler 2 Computer
+                            </Col>
                         </Row>
                         <Row>
-                            <Button color="primary"
-                                onClick={() => this.game.runGame((gameState: MolaState) => this.handleUpdate(gameState))}>
-                                Neues Spiel
-                            </Button>
+                            <Col sm="12" style={this.controlElementStyle}>
+                                <Button color="primary" style={{width: '90%'}}
+                                    onClick={() => this.game.runGame((gameState: MolaState) => this.handleUpdate(gameState))}>
+                                    Neues Spiel
+                                </Button>
+                            </Col>
                         </Row>
                         <Row>
-                            <Button color="secondary"
-                                onClick={() => this.game.trainAI((gameState: MolaState) => this.handleUpdate(gameState), 1000)}>
-                                Trainiere KI</Button>
+                            <Col sm="12" style={this.controlElementStyle}>
+                                <Button color="secondary" style={{width: '90%'}}
+                                    onClick={() => this.game.runGame((gameState: MolaState) => this.handleUpdate(gameState))}>
+                                    Pause
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm="12" style={this.controlElementStyle}>
+                                <Button color="secondary" style={{width: '90%'}}
+                                    onClick={() => this.game.runGame((gameState: MolaState) => this.handleUpdate(gameState))}>
+                                    Spiel beenden
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm="12" style={this.controlElementStyle}>
+                                <Button color="secondary" style={{width: '90%'}}
+                                    onClick={() => this.game.trainAI((gameState: MolaState) => this.handleUpdate(gameState), 1000)}>
+                                    Trainiere KI</Button>
+                            </Col>
                         </Row>
                     </Col>
                     <Board gameState={this.state.gameState} selectField={(position: number) => this.selectField(position)}></Board>
