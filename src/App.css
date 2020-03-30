@@ -3,6 +3,7 @@ body {
   color: #ffffff;
 }
 
+/* Navigation */
 .navigation {
   background-color: #444B6E;
 }
@@ -11,9 +12,20 @@ body {
   cursor: pointer;
 }
 
+/* headline */
+
+.headline {
+  padding: 2rem 0 0 0;
+  margin: 0 0 1rem 0;
+};
+
+/* modals */
+
 .information {
   background-color: #3D315B;
 }
+
+/* game board */
 
 .gamefield {
   width: 12vw;
@@ -21,5 +33,25 @@ body {
   border: 0.5rem outset;
   margin: 0.2rem;
   cursor: pointer;
-};
+}
+
+.controlPanel {
+  background-color: #444B6E;
+  border: 0.5rem outset #444B6E;
+  padding-top: 0.5rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.controlPanel .checkInput { 
+  padding: 0 0 0 1rem;
+  margin: 0 0 0 1rem;
+}
+
+.controlPanel .controlButton {
+  padding: 0.5rem 0 0.5rem 0;
+}
+.controlPanel .controlButton button {
+  width: 90%;
+}
 

@@ -34,34 +34,17 @@ interface IState {
 
 export class Mola extends React.Component<IProps, IState> {
 
-    headlineStyle = {
-        paddingTop: '2rem',
-        marginBottom: '1rem'
-    };
-
-    controlStyle = {
-        backgroundColor: '#444B6E',
-        border: '0.5rem outset #444B6E',
-        paddingTop: '0.5rem',
-        marginBottom: '1rem',
-        overflow: 'hidden'
-    };
-
-    controlElementStyle = {
-        padding: '0.5rem 0 0.5rem 0',
-    };
-
     game: MolaGame = new MolaGame();
     userPickedField: number = -1;
 
     constructor(props: any) {
         super(props);
-        this.state = { gameState: new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0]), showDescription: false }
+        this.state = { gameState: MolaState.getInitialState(), showDescription: false }
     }
 
     handleUpdate(gameState: MolaState) {
         this.setState({ gameState: gameState },
-            () => { console.log("Component state: " + this.state.gameState.positions) });
+            () => { console.log("Component state: " + this.state.gameState.getPositions()) });
     }
 
     handleChangeOne(event: React.ChangeEvent<HTMLInputElement>) {
@@ -78,23 +61,20 @@ export class Mola extends React.Component<IProps, IState> {
 
     selectField(position: number) {
         if (this.game.gameState.currentPlayer instanceof HumanPlayer) {
+            let positions = this.game.gameState.currentState.getPositions();
             if (!allStonesSet(this.game.gameState.currentState, this.game.gameState.currentPlayer)) {
-                if (this.game.gameState.currentState.positions[position] === 0) {
-                    let userChoice = new MolaState(Object.assign([], this.game.gameState.currentState.positions));
-                    userChoice.positions[position] = this.game.gameState.currentPlayer.getPlayerSymbol();
-                    (this.game.gameState.currentPlayer as HumanPlayer).userChoice = userChoice;
+                if (positions[position] === 0) {
+                    (this.game.gameState.currentPlayer as HumanPlayer).userChoice = 
+                        this.game.gameState.currentState.putStone(this.game.gameState.currentPlayer.getPlayerSymbol(), position);
                 }
             } else {
-                if (this.userPickedField < 0 &&
-                    this.game.gameState.currentState.positions[position] === this.game.gameState.currentPlayer.getPlayerSymbol()) {
+                if (this.userPickedField < 0 && positions[position] === this.game.gameState.currentPlayer.getPlayerSymbol()) {
                     this.userPickedField = position;
                 } else {
-                    if (this.game.gameState.currentState.positions[position] === 0) {
-                        let userChoice = new MolaState(Object.assign([], this.game.gameState.currentState.positions));
-                        userChoice.positions[this.userPickedField] = 0;
-                        userChoice.positions[position] = this.game.gameState.currentPlayer.getPlayerSymbol();
+                    if (positions[position] === 0) {
+                        (this.game.gameState.currentPlayer as HumanPlayer).userChoice = 
+                            this.game.gameState.currentState.moveStone(this.userPickedField, position);
                         this.userPickedField = -1;
-                        (this.game.gameState.currentPlayer as HumanPlayer).userChoice = userChoice;
                     }
                 }
             }
@@ -104,27 +84,27 @@ export class Mola extends React.Component<IProps, IState> {
     render() {
         return (
             <Container>
-                <Row style={this.headlineStyle}>
+                <Row className="headline">
                     <Col>
                         <h2>Kleine Mühle (römische Mühle)</h2>
                     </Col>
                 </Row>
                 <Row>
-                    <Col sm="12" md="2" style={this.controlStyle}>
+                    <Col sm="12" md="2" className="controlPanel" >
                         <Row>
-                            <Col sm="12" style={{ padding: '0 0 0 1rem', margin: '0 0 0 1rem' }}>
+                            <Col sm="12" className="checkInput">
                                 <Input type="checkbox" onChange={(event) => this.handleChangeOne(event)} /> Spieler 1 Computer
                             </Col>
                         </Row>
                         <Row>
-                            <Col sm="12" style={{ padding: '0 0 0 1rem', margin: '0 0 0 1rem' }}>
+                            <Col sm="12" className="checkInput">
                                 <Input type="checkbox" onChange={(event) => this.handleChangeTwo(event)} /> Spieler 2 Computer
                             </Col>
                         </Row>
                         {!this.game.gameState.running &&
                             <Row>
-                                <Col sm="12" style={this.controlElementStyle}>
-                                    <Button color="primary" style={{ width: '90%' }}
+                                <Col sm="12" className="controlButton">
+                                    <Button color="primary"
                                         onClick={() => this.game.runGame((gameState: MolaState) => this.handleUpdate(gameState))}>
                                         Neues Spiel
                                 </Button>
@@ -134,8 +114,8 @@ export class Mola extends React.Component<IProps, IState> {
 
                         {this.game.gameState.running &&
                             <Row>
-                                <Col sm="12" style={this.controlElementStyle}>
-                                    <Button color="secondary" style={{ width: '90%' }}
+                                <Col sm="12" className="controlButton">
+                                    <Button color="secondary"
                                         onClick={() => { this.game.stopGame((gameState: MolaState) => this.handleUpdate(gameState)) }}>
                                         Spiel beenden
                                     </Button>
@@ -143,15 +123,15 @@ export class Mola extends React.Component<IProps, IState> {
                             </Row>
                         }
                         <Row>
-                            <Col sm="12" style={this.controlElementStyle}>
-                                <Button color="info" style={{ width: '90%' }}
+                            <Col sm="12" className="controlButton">
+                                <Button color="info"
                                     onClick={() => { this.toggleDescription() }}>
                                     Spielregeln</Button>
                             </Col>
                         </Row>
                         <Row>
-                            <Col sm="12" style={this.controlElementStyle}>
-                                <Button color="secondary" style={{ width: '90%' }}
+                            <Col sm="12" className="controlButton">
+                                <Button color="secondary"
                                     onClick={() => this.game.trainAI((gameState: MolaState) => this.handleUpdate(gameState), 1000)}>
                                     Trainiere KI</Button>
                             </Col>

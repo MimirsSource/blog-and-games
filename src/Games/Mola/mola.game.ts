@@ -3,6 +3,7 @@ import { getAllowedMoves, isWinningState } from "./mola.rules";
 import { MolaPlayer, AIPlayer, HumanPlayer } from "./mola.player";
 
 type GameState = {running: boolean, currentPlayer: MolaPlayer, currentState: MolaState};
+type StateHandler = (gameState: MolaState) => void;
 
 const aiPlayerOne = new AIPlayer(1);
 const aiPlayerTwo = new AIPlayer(2);
@@ -11,16 +12,16 @@ const humanPlayerTwo = new HumanPlayer(2);
 
 export class MolaGame {
 
-    training: boolean = false;
-    trainingGamesRemaining: number = 0;
-    intervalId: any;
-    playerOneAI: boolean = false;
-    playerTwoAI: boolean = false;
+    private training: boolean = false;
+    private trainingGamesRemaining: number = 0;
+    private intervalId: any;
+    private playerOneAI: boolean = false;
+    private playerTwoAI: boolean = false;
 
-    gameState: GameState = {running: false, currentPlayer: this.playerSetup(), currentState: new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0])} ;
+    gameState: GameState = {running: false, currentPlayer: this.playerSetup(), currentState: MolaState.getInitialState()};
 
-    runGame(uiStateHandler: (gameState: MolaState) => void) {
-        this.gameState = {running: true, currentPlayer: this.playerSetup(), currentState: new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0])};
+    runGame(uiStateHandler: StateHandler) {
+        this.gameState = {running: true, currentPlayer: this.playerSetup(), currentState: MolaState.getInitialState()};
         if(this.gameState.currentPlayer instanceof AIPlayer) {
             (this.gameState.currentPlayer as AIPlayer).trainingMode = this.training;
         }
@@ -32,14 +33,12 @@ export class MolaGame {
         this.intervalId = setInterval(() => this.gameIteration(uiStateHandler), this.training ? 10 : 2000);
     }
 
-    stopGame(uiStateHandler: (gameState: MolaState) => void) {
-        this.reset();
-        this.gameState.running = false;
+    stopGame(uiStateHandler: StateHandler) {
         uiStateHandler(this.gameState.currentState);
-        clearInterval(this.intervalId);
+        this.resetGame();
     }
 
-    gameIteration(uiStateHandler: (gameState: MolaState) => void) {
+    gameIteration(uiStateHandler: StateHandler) {
         if(this.gameState.running === true) {
             console.log("Do move!");
             if(this.doMove(this.gameState.currentPlayer, uiStateHandler)) {
@@ -47,19 +46,17 @@ export class MolaGame {
             }
         } else {
             console.log("Finish!");
-            clearInterval(this.intervalId);
             if(this.trainingGamesRemaining-1 > 0) {
-                this.gameState.running = false;
-                this.gameState.currentState = new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                this.resetGame();
                 this.trainingGamesRemaining--;
                 this.runGame(uiStateHandler); // TODO cleanup
             } else {
-                this.reset();
+                this.resetTraining();
             }
         }
     }
 
-    playerSetup(): MolaPlayer {
+    private playerSetup(): MolaPlayer {
         let playerOne = this.playerOneAI ? aiPlayerOne : humanPlayerOne;
         let playerTwo = this.playerTwoAI ? aiPlayerTwo : humanPlayerTwo;
         playerOne.setOpponent(playerTwo);
@@ -75,10 +72,16 @@ export class MolaGame {
         this.playerTwoAI = !human;
     }
 
-    reset() {
+    private resetTraining(): void {
+        this.resetGame();
         this.training = false;
         this.trainingGamesRemaining = 0;
-        this.gameState.currentState = new MolaState([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
+
+    private resetGame(): void {
+        clearInterval(this.intervalId);
+        this.gameState.running = false;
+        this.gameState.currentState = MolaState.getInitialState()
     }
 
     trainAI(uiStateHandler: (gameState: MolaState) => void, games: number) {
@@ -87,7 +90,7 @@ export class MolaGame {
         this.runGame(uiStateHandler);
     }
 
-    doMove(player: MolaPlayer, uiStateHandler: (gameState: MolaState) => void): boolean {
+    doMove(player: MolaPlayer, uiStateHandler: StateHandler): boolean {
         let stateChoice = player.chooseMove(getAllowedMoves(this.gameState.currentState, player));
         if(stateChoice === null) {
             return false;
