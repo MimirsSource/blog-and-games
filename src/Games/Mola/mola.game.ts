@@ -38,6 +38,11 @@ export class MolaGame {
         this.resetGame();
     }
 
+    setDifficulty(level: number) {
+        aiPlayerOne.setIterations(level);
+        aiPlayerTwo.setIterations(level);
+    }
+
     gameIteration(uiStateHandler: StateHandler) {
         if(this.gameState.running === true) {
             console.log("Do move!");

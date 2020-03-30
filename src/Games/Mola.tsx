@@ -1,10 +1,12 @@
 import React, { Component, useState } from "react";
 
-import { Container, Row, Col, Label, Input, Button, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import { Container, Row, Col, Input, Button, Modal, 
+    ModalHeader, ModalBody, ModalFooter} from "reactstrap";
 import { MolaGame } from "./Mola/mola.game";
 import MolaState from "./Mola/mola.state";
 import { allStonesSet } from "./Mola/mola.rules";
 import { HumanPlayer } from "./Mola/mola.player";
+import { InformationModal } from "../Dialogs/Information.modal";
 
 /**
  * Color scheme:
@@ -44,7 +46,7 @@ export class Mola extends React.Component<IProps, IState> {
 
     handleUpdate(gameState: MolaState) {
         this.setState({ gameState: gameState },
-            () => { console.log("Component state: " + this.state.gameState.getPositions()) });
+            () => { /* console.log("Component state: " + this.state.gameState.getPositions()) */ });
     }
 
     handleChangeOne(event: React.ChangeEvent<HTMLInputElement>) {
@@ -53,6 +55,10 @@ export class Mola extends React.Component<IProps, IState> {
 
     handleChangeTwo(event: React.ChangeEvent<HTMLInputElement>) {
         this.game.setHumanPlayerTwo(!event.target.checked);
+    }
+
+    changeDifficutly(event: React.ChangeEvent<HTMLInputElement>) {
+        this.game.setDifficulty(parseInt(event.target.value, 10));
     }
 
     toggleDescription() {
@@ -131,6 +137,15 @@ export class Mola extends React.Component<IProps, IState> {
                         </Row>
                         <Row>
                             <Col sm="12" className="controlButton">
+                                <Input type="select" name="level" id="level" onChange={(event) => {this.changeDifficutly(event)}}>
+                                    <option value="0" selected >Einfach</option>
+                                    <option value="1" >Normal</option>
+                                    <option value="2" >Schwierig</option>
+                                </Input>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col sm="12" className="controlButton">
                                 <Button color="secondary"
                                     onClick={() => this.game.trainAI((gameState: MolaState) => this.handleUpdate(gameState), 1000)}>
                                     Trainiere KI</Button>
@@ -138,7 +153,23 @@ export class Mola extends React.Component<IProps, IState> {
                         </Row>
                     </Col>
                     <Board gameState={this.state.gameState} selectField={(position: number) => this.selectField(position)}></Board>
-                    <Description open={this.state.showDescription} toggle={() => { this.toggleDescription() }}></Description>
+                    <InformationModal 
+                    open={this.state.showDescription} 
+                    toggle={() => { this.toggleDescription() }}
+                    headline="Spielregeln">
+                        <b>Ziel des Spiels</b>
+                        <p>Jeder Spieler besitzt drei Spielsteine.</p>
+                        <p>Gewinner ist, wer seine drei Steine zuerst in eine Reihe gelegt bekommt.</p>
+                        <p>Es gelten waagrechte, senkrechte und diagonale Reihen.</p>
+                        <b>Ablauf des Spiels</b>
+                        <p>Zuerst setzen die Spieler ihre Steine abwechselnd auf das Spielfeld, bis alle Steine gesetzt sind.</p>
+                        <p>Sind alle Steine gesetzt darf gezogen oder gesprungen werden.
+                            Züge sind jeweils waagrecht und senkrecht erlaubt.
+                        </p>
+                        <p>Liegt ein gegnerischer Stein neben dem eigenen, kann dieser übersprungen werden, sofern das Feld dahinter frei ist.
+                            Es kann nur waagrecht und senkrecht gesprungen werden.
+                        </p>
+                    </InformationModal>
                 </Row>
             </Container>)
     }
@@ -201,7 +232,6 @@ const Field = (props: any) => {
     };
 
     let getLayout = function (player: number) {
-        console.log('Player ' + player)
         if (player === 1) {
             return styleOne;
         }

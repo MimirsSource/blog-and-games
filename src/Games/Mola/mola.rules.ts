@@ -24,7 +24,7 @@ class SetRule implements Rule {
                 }
             }
         }
-        console.log(result);
+        // console.log(result);
         return result;
     }
 
@@ -120,7 +120,7 @@ export const getAllowedMoves = (state: MolaState, player: MolaPlayer): MolaState
     let result: MolaState[] = new Array();
     for (let i: number = 0; i < rules.length; i++) {
         result = result.concat(rules[i].resultingStates(state, player));
-        console.log(result);
+        // console.log(result);
     }
     return result;
 }

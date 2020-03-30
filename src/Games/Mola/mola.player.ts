@@ -6,7 +6,7 @@ export abstract class MolaPlayer {
 
     opponent!: MolaPlayer;
 
-    constructor(private playerSymbol: number) { }
+    constructor(private readonly playerSymbol: number) { }
 
     setOpponent(player: MolaPlayer) {
         this.opponent = player;
@@ -29,6 +29,8 @@ export class AIPlayer extends MolaPlayer {
     private readonly minValue = -1000;
     private readonly maxValue = 1000;
     public trainingMode: boolean = false;
+    private iterations: number = 0;
+    private factor: number = 0.5;
 
     private knowledgeBase: Map<string, number> = new Map();
     private choiceHistory: Array<string> = new Array();
@@ -38,6 +40,11 @@ export class AIPlayer extends MolaPlayer {
             return this.trainingChoice(states);
         }
         return this.makeChoice(states);
+    }
+
+    public setIterations(iterations: number) {
+        console.log("Updating iterations to " + iterations);
+        this.iterations = iterations;
     }
 
     private trainingChoice(states: MolaState[]): MolaState {
@@ -59,7 +66,7 @@ export class AIPlayer extends MolaPlayer {
                 return states[i];
             }
             let currentValue = (this.knowledgeBase.get(states[i].getId().toString() + 'm') || 0)
-                + this.getOpponentMinValue(states[i]) * 0.95;
+                + this.getOpponentMinValue(states[i], this.iterations, this.factor) * 0.95;
             if (currentValue != null && currentValue >= stateValue) {
                 stateValue = currentValue;
                 choice = states[i];
@@ -68,7 +75,7 @@ export class AIPlayer extends MolaPlayer {
         return choice;
     }
 
-    getOpponentMinValue(state: MolaState) {
+    private getOpponentMinValue(state: MolaState, iterations: number, factor: number) {
         let opponentStates = getAllowedMoves(state, this.opponent);
         let oppValue: number = 0;
         for (let oppState of opponentStates) {
@@ -76,8 +83,28 @@ export class AIPlayer extends MolaPlayer {
                 return this.minValue;
             }
             oppValue = Math.min(oppValue, (this.knowledgeBase.get(oppState.getId() + 'o') || 0));
+            if(iterations > 0) {
+                oppValue += this.getOwnMaxValue(oppState, iterations-1, factor) * factor;
+            }
         }
         return oppValue;
+    }
+
+    private getOwnMaxValue(state: MolaState, iterations: number, factor: number) {
+        console.log("Next iteration" + iterations);
+        let states = getAllowedMoves(state, this);
+        let value: number = 0;
+        for (let state of states) {
+            if (isWinningState(state, this)) {
+                return this.maxValue*factor;
+            }
+            value = Math.max(value, (this.knowledgeBase.get(state.getId() + 'o') || 0));
+            if(iterations > 0) {
+                value += this.getOpponentMinValue(state, iterations, factor) * 0.95;
+            }
+        }
+        return value*factor;
+
     }
 
     opponentStateInformation(state: MolaState): void {
