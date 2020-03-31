@@ -16,7 +16,7 @@ export class MolaGame {
     private trainingGamesRemaining: number = 0;
     private intervalId: any;
     private playerOneAI: boolean = false;
-    private playerTwoAI: boolean = false;
+    private playerTwoAI: boolean = true;
 
     gameState: GameState = {running: false, currentPlayer: this.playerSetup(), currentState: MolaState.getInitialState()};
 

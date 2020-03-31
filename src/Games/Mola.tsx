@@ -5,7 +5,7 @@ import { Container, Row, Col, Input, Button, Modal,
 import { MolaGame } from "./Mola/mola.game";
 import MolaState from "./Mola/mola.state";
 import { allStonesSet } from "./Mola/mola.rules";
-import { HumanPlayer } from "./Mola/mola.player";
+import { HumanPlayer, AIPlayer } from "./Mola/mola.player";
 import { InformationModal } from "../Dialogs/Information.modal";
 
 /**
@@ -32,6 +32,8 @@ interface IProps {
 interface IState {
     gameState: MolaState;
     showDescription: boolean;
+    playerOneAI: boolean;
+    playerTwoAI: boolean;
 }
 
 export class Mola extends React.Component<IProps, IState> {
@@ -41,7 +43,12 @@ export class Mola extends React.Component<IProps, IState> {
 
     constructor(props: any) {
         super(props);
-        this.state = { gameState: MolaState.getInitialState(), showDescription: false }
+        this.state = { 
+            gameState: MolaState.getInitialState(), 
+            showDescription: false,
+            playerOneAI: false,
+            playerTwoAI: true
+         }
     }
 
     handleUpdate(gameState: MolaState) {
@@ -50,10 +57,12 @@ export class Mola extends React.Component<IProps, IState> {
     }
 
     handleChangeOne(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({playerOneAI: event.target.checked});
         this.game.setHumanPlayerOne(!event.target.checked);
     }
 
     handleChangeTwo(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({playerTwoAI: event.target.checked});
         this.game.setHumanPlayerTwo(!event.target.checked);
     }
 
@@ -99,12 +108,16 @@ export class Mola extends React.Component<IProps, IState> {
                     <Col sm="12" md="2" className="controlPanel" >
                         <Row>
                             <Col sm="12" className="checkInput">
-                                <Input type="checkbox" onChange={(event) => this.handleChangeOne(event)} /> Spieler 1 Computer
+                                <Input type="checkbox" onChange={(event) => this.handleChangeOne(event)} 
+                                checked={this.state.playerOneAI}
+                                disabled={this.game.gameState.running} /> Spieler 1 Computer
                             </Col>
                         </Row>
                         <Row>
                             <Col sm="12" className="checkInput">
-                                <Input type="checkbox" onChange={(event) => this.handleChangeTwo(event)} /> Spieler 2 Computer
+                                <Input type="checkbox" onChange={(event) => this.handleChangeTwo(event)} 
+                                checked={this.state.playerTwoAI}
+                                disabled={this.game.gameState.running} /> Spieler 2 Computer
                             </Col>
                         </Row>
                         {!this.game.gameState.running &&
@@ -147,6 +160,7 @@ export class Mola extends React.Component<IProps, IState> {
                         <Row>
                             <Col sm="12" className="controlButton">
                                 <Button color="secondary"
+                                    disabled={!(this.state.playerOneAI && this.state.playerTwoAI)}
                                     onClick={() => this.game.trainAI((gameState: MolaState) => this.handleUpdate(gameState), 1000)}>
                                     Trainiere KI</Button>
                             </Col>
